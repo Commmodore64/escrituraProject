@@ -2,7 +2,7 @@ import react from '@vitejs/plugin-react';
 import path from 'path';
 import { defineConfig } from 'vite';
 
-const basenameProd = '/react-shadcn-starter';
+const basenameProd = '/react-shadcn-starter/'; // Nota el '/' al final
 
 export default defineConfig(({ command }) => {
   const isProd = command === 'build';
@@ -25,9 +25,6 @@ export default defineConfig(({ command }) => {
             return;
           }
           warn(warning);
-        },
-        commonjsOptions: {
-          include: /node_modules/,
         },
         external: ['axios'],
       },
