@@ -17,26 +17,49 @@ app.get('/api/consultaInmuebles', (req, res) => {
   const { FOLIOREAL } = req.query;
   const url = `http://srppn.chihuahua.gob.mx/rpp/WebAPI/Servicios/ConsultaAvanzada/consultaInmuebles?FOLIOREAL=${FOLIOREAL}&BUSCAR=LL&TODOS=S&page=1&start=0&limit=5`;
 
-  console.log('Solicitud al servidor externo:', url); // Imprime la URL de la solicitud
-
   fetch(url, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
-      'Cookie': '.AspNet.ApplicationCookie=J2diw7kMpeoOvtN4j4Dibx9mjzXCiiGBjln7vHrOGl6p_HKO02ohm6rkjg_Rhc8BQokWxX99hjwU4TKRXssW6tg2jSnDjETKWnYcAblykvNxoTmYpCdHjJ-t7f2yAvVErtDEA_sHcEtiyLlXhMDwPMY8r1zIZWAoOAzYbMJFrM-rbrzeLDKe06M0eSE1uzhfPuXXE_H9V4alms23mpTVLzdwptdOhI_qXOaej8eazKGAg3djaSws1GzJw04OjNagGaiPO8R5HXJvTr5LBWrq_NJeB_ZMAQpujsCc0qgzAmM0RWol-tPFwUSp3S9GE_Roedg2eOeFiWSpf5D0pf6p4bdWoqwI6uu9By6zaR5WX4Pio-asZOV335xVpGJ_23uDzPSXVYxqlFoBc15Jy5IPJciMlcxBWlFcvHM1e6aUpAVnOGAheiYEkhFnwHKIRORTZpymgvBJDG1lSOHs6S3DLzyCTkG7OQUd8FeOuACGTceMCB1b7HLS1oOjHL799vf-BV-wnVY3QAsdbTNRRej6_gqsbm93LyOccFuBKpGF_2ihZvoQaea2OECKxZ1OChuQDVl4xL1VbegQ4xWOKBhQRQ'
+      'Cookie': '.AspNet.ApplicationCookie=R8wBdMIBPD1tWxmZLVsmY2R9kTorrpvuqHgtkNY76xMj6Cn7etRXRvyo4gRaD_nAQXwVNYGb4nXjE5d6tgvkutaGqADTRY09bpZ46aNve1QH7Rr6KFYPtQbeLYjwanhs3vDjTPYwGSMHbU3yko-X9CkjfnjVxjv_v3lwTY6vc7-KLA9w4p6a8hPb6BFqi3sYcszXd7n0xsH3huV-CZle5TKRpzkpOST2R2IlyquORRNqZZFY9NcLpDvBMvctwsvjps0dKRtnZcksKwzo3--uGIohMvP5Vs0YyiCRkVoenpdnFXrzVOjZoIlE_rtxy1Fd3Qiv6XRqdMe9RSBZlU8IZJeTm8NLHz8lGlt3tCBOfUBs7lBvKtAQHvvTO89jNfrY0mV8MXQxRyFDmb95RmmcBuAt73nWx8INaiyxViMQehGnMP2kVOl6P706Xki3eRFbh8FO-_YufYVgOsX8dowIrxpxJ1hjl3ZeNxBOEoqbghkz19i-NLE-qbSCQ_Er5b1mk1G6NzFzmfYh3ifIXZor0cFEXz8GpAp8brvQ-Lww6_d3SWRaC8vllvjmEKGD5HaYenQ-c5FXR8txyxd8lrvZXg'
     }
   })
-    .then(response => {
-      console.log('Respuesta del servidor externo:', response.status, response.statusText); // Imprime el estado de la respuesta
-      return response.json();
-    })
+    .then(response => response.json())
     .then(data => {
-      console.log('Datos recibidos del servidor externo:', data); // Imprime los datos recibidos
       res.json(data);
     })
     .catch(error => {
       console.error('Error en la solicitud al servidor externo:', error);
       res.status(500).json({ error: 'Error al consultar el servidor externo' });
+    });
+});
+
+app.get('/api/descargarPDF', (req, res) => {
+  const { partida } = req.query;
+  const pdfUrl = `http://srppn.chihuahua.gob.mx/rpp/WebAPI/Servicios/CopiasCertificadas/ObtenerAgregadoPorPartida?partida=${partida}`;
+
+  fetch(pdfUrl, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/pdf',
+      'Cookie': '.AspNet.ApplicationCookie=R8wBdMIBPD1tWxmZLVsmY2R9kTorrpvuqHgtkNY76xMj6Cn7etRXRvyo4gRaD_nAQXwVNYGb4nXjE5d6tgvkutaGqADTRY09bpZ46aNve1QH7Rr6KFYPtQbeLYjwanhs3vDjTPYwGSMHbU3yko-X9CkjfnjVxjv_v3lwTY6vc7-KLA9w4p6a8hPb6BFqi3sYcszXd7n0xsH3huV-CZle5TKRpzkpOST2R2IlyquORRNqZZFY9NcLpDvBMvctwsvjps0dKRtnZcksKwzo3--uGIohMvP5Vs0YyiCRkVoenpdnFXrzVOjZoIlE_rtxy1Fd3Qiv6XRqdMe9RSBZlU8IZJeTm8NLHz8lGlt3tCBOfUBs7lBvKtAQHvvTO89jNfrY0mV8MXQxRyFDmb95RmmcBuAt73nWx8INaiyxViMQehGnMP2kVOl6P706Xki3eRFbh8FO-_YufYVgOsX8dowIrxpxJ1hjl3ZeNxBOEoqbghkz19i-NLE-qbSCQ_Er5b1mk1G6NzFzmfYh3ifIXZor0cFEXz8GpAp8brvQ-Lww6_d3SWRaC8vllvjmEKGD5HaYenQ-c5FXR8txyxd8lrvZXg'
+    }
+  })
+    .then(response => {
+      if (response.ok) {
+        return response.buffer(); // Obtener el PDF como Buffer
+      } else {
+        throw new Error('Error al obtener el PDF');
+      }
+    })
+    .then(buffer => {
+      res.setHeader('Content-Disposition', 'attachment; filename=documento.pdf');
+      res.setHeader('Content-Type', 'application/pdf');
+      res.send(buffer);
+    })
+    .catch(error => {
+      console.error('Error al obtener el PDF:', error);
+      res.status(500).json({ error: 'Error al obtener el PDF' });
     });
 });
 

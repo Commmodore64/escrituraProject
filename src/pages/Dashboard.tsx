@@ -43,12 +43,38 @@ export default function Dashboard() {
       .then((data) => {
         console.log("Datos recibidos:", data);
 
-        // Suponiendo que PARTIDA está en un objeto dentro de un array
         const partida = data.Datos?.find((item: any) => item.PARTIDA)?.PARTIDA;
 
         if (partida) {
           console.log("Número de PARTIDA encontrado:", partida);
-          // Aquí puedes continuar con la lógica para descargar el PDF
+
+          // Solicitar el PDF desde el servidor
+          const pdfUrl = `http://localhost:3001/api/descargarPDF?partida=${partida}`;
+
+          fetch(pdfUrl, {
+            method: "GET",
+            credentials: "include",
+          })
+            .then((response) => {
+              if (response.ok) {
+                return response.blob(); // Obtener el PDF como Blob
+              } else {
+                throw new Error("Error al descargar el PDF");
+              }
+            })
+            .then((blob) => {
+              const url = window.URL.createObjectURL(blob);
+              const a = document.createElement("a");
+              a.href = url;
+              a.download = "documento.pdf"; // Nombre del archivo a descargar
+              document.body.appendChild(a);
+              a.click();
+              a.remove();
+              window.URL.revokeObjectURL(url); // Liberar el URL del Blob
+            })
+            .catch((error) => {
+              console.error("Error al descargar el PDF:", error);
+            });
         } else {
           console.error("No se encontró el número de PARTIDA en los datos");
         }
