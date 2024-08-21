@@ -28,7 +28,7 @@ export default function Dashboard() {
   };
 
   // Función para manejar la solicitud al presionar "Generar"
-  const handleGenerateClick = async () => {
+  const handleGenerateClick = () => {
     if (otp.length < 7) {
       console.error("El OTP debe tener 7 dígitos");
       return;
@@ -38,50 +38,56 @@ export default function Dashboard() {
 
     const url = `http://localhost:3001/api/consultaInmuebles?FOLIOREAL=${otp}&BUSCAR=LL&TODOS=S&page=1&start=0&limit=5`;
 
-    try {
-      const response = await fetch(url, {
-        method: "GET",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+    fetch(url, {
+      method: "GET",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log("Datos recibidos:", data);
 
-      const data = await response.json();
-      console.log("Datos recibidos:", data);
+        const partida = data.Datos?.find((item: any) => item.PARTIDA)?.PARTIDA;
 
-      const partida = data.Datos?.find((item: any) => item.PARTIDA)?.PARTIDA;
+        if (partida) {
+          console.log("Número de PARTIDA encontrado:", partida);
 
-      if (partida) {
-        console.log("Número de PARTIDA encontrado:", partida);
+          // Solicitar el PDF procesado desde el servidor
+          const pdfUrl = `http://localhost:3001/api/descargarPDF?partida=${partida}`;
 
-        // Solicitar el PDF procesado desde el servidor
-        const pdfUrl = `http://localhost:3001/api/descargarPDF?partida=${partida}`;
-
-        const pdfResponse = await fetch(pdfUrl, {
-          method: "GET",
-          credentials: "include",
-        });
-
-        if (pdfResponse.ok) {
-          const blob = await pdfResponse.blob();
-          const url = window.URL.createObjectURL(blob);
-          const a = document.createElement("a");
-          a.href = url;
-          a.download = "documento.pdf"; // Nombre del archivo a descargar
-          document.body.appendChild(a);
-          a.click();
-          a.remove();
-          window.URL.revokeObjectURL(url); // Liberar el URL del Blob
+          fetch(pdfUrl, {
+            method: "GET",
+            credentials: "include",
+          })
+            .then((response) => {
+              if (response.ok) {
+                return response.blob(); // Obtener el PDF como Blob
+              } else {
+                throw new Error("Error al descargar el PDF procesado");
+              }
+            })
+            .then((blob) => {
+              const url = window.URL.createObjectURL(blob);
+              const a = document.createElement("a");
+              a.href = url;
+              a.download = "documento_sin_marca.pdf"; // Nombre del archivo a descargar
+              document.body.appendChild(a);
+              a.click();
+              a.remove();
+              window.URL.revokeObjectURL(url); // Liberar el URL del Blob
+            })
+            .catch((error) => {
+              console.error("Error al descargar el PDF procesado:", error);
+            });
         } else {
-          throw new Error("Error al descargar el PDF procesado");
+          console.error("No se encontró el número de PARTIDA en los datos");
         }
-      } else {
-        console.error("No se encontró el número de PARTIDA en los datos");
-      }
-    } catch (error) {
-      console.error("Error en la solicitud:", error);
-    }
+      })
+      .catch((error) => {
+        console.error("Error en la solicitud:", error);
+      });
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -112,7 +118,7 @@ export default function Dashboard() {
         }
       );
 
-      // Crear un enlace para descargar el archivo
+      // Crear un enlace para descargar el archivo procesado
       const url = window.URL.createObjectURL(new Blob([response.data]));
       setDownloadLink(url);
     } catch (err) {
@@ -131,7 +137,7 @@ export default function Dashboard() {
       <Card>
         <CardHeader>
           <CardTitle className="text-xl">Genera tu escritura en PDF</CardTitle>
-          <CardDescription>Ingresa el número de folio real</CardDescription>
+          <CardDescription>Ingresa el numero de folio real</CardDescription>
           <div className="flex justify-center items-center p-10">
             <InputOTP maxLength={7} onChange={handleOtpChange} value={otp}>
               <InputOTPGroup>

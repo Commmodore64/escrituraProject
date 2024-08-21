@@ -1,38 +1,31 @@
-const express = require('express');
-const cors = require('cors');
 const { exec } = require('child_process');
 const path = require('path');
 const fs = require('fs');
-const app = express();
-app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 
-app.post('/process-pdf', (req, res) => {
-  const { inputPdf } = req.files; // Cambiar a req.files si usas multer para el manejo de archivos
+const inputPdf = path.join(__dirname, 'uploads', '4e99f9b009faff68a252bcc363af090c');
+const outputDocx = path.join(__dirname, 'uploads', 'processed_file.docx');
+const outputPdf = path.join(__dirname, 'uploads', 'processed_file.pdf');
 
-  const inputPdfPath = path.resolve('temp.pdf');
-  const outputDocxPath = path.resolve('temp.docx');
-  const outputPdfPath = path.resolve('output.pdf');
-  const watermarkText = "REPRODUCCIÓN PROHIBIDA SU SOLO CONSULTA,";
+// Asegúrate de que las rutas están correctamente formateadas
+const command = `python3 removeWatermark.py "${inputPdf}" "${outputDocx}" "${outputPdf}"`;
 
-  fs.writeFileSync(inputPdfPath, inputPdf.data); // Guardar el PDF temporalmente
+exec(command, (error, stdout, stderr) => {
+  if (error) {
+    console.error(`Error al ejecutar el script de Python: ${error}`);
+    return res.status(500).send('Error al procesar el archivo');
+  }
+  if (stderr) {
+    console.error(`Error en el script de Python: ${stderr}`);
+  }
 
-  exec(`python removeWatermark.py "${inputPdfPath}" "${outputDocxPath}" "${outputPdfPath}" "${watermarkText}"`, (error, stdout, stderr) => {
-    if (error) {
-      console.error(`Error ejecutando el script Python: ${error}`);
-      return res.status(500).send('Error procesando el PDF');
+  // Enviar el archivo procesado al frontend
+  res.download(outputPdf, 'documento_sin_marca.pdf', (err) => {
+    if (err) {
+      console.error('Error al enviar el archivo procesado:', err);
     }
-
-    res.sendFile(outputPdfPath, () => {
-      fs.unlinkSync(inputPdfPath);
-      fs.unlinkSync(outputDocxPath);
-      fs.unlinkSync(outputPdfPath);
-    });
+    // Limpiar archivos temporales
+    fs.unlink(inputPdf, () => {});
+    fs.unlink(outputDocx, () => {});
+    fs.unlink(outputPdf, () => {});
   });
-});
-
-const PORT = process.env.PORT || 3002;
-app.listen(PORT, () => {
-  console.log(`Servidor corriendo en el puerto ${PORT}`);
 });

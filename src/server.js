@@ -4,10 +4,26 @@ import cors from 'cors';
 import express from 'express';
 import fs from 'fs';
 import multer from 'multer';
-import fetch from 'node-fetch';
 import path from 'path';
 
 const app = express();
+
+import fetch from 'node-fetch';
+
+// Ejemplo de función que descarga un archivo y lo convierte en un buffer
+async function downloadFile(url) {
+    try {
+        const response = await fetch(url);
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+        const buffer = await response.arrayBuffer(); // Usa arrayBuffer() si estás con fetch
+        return Buffer.from(buffer); // Convierte arrayBuffer a Buffer de Node.js
+    } catch (error) {
+        console.error('Error al obtener el PDF:', error);
+        throw error;
+    }
+}
+
 
 app.use(cors({
   origin: 'http://localhost:5173',
@@ -97,13 +113,18 @@ app.get('/api/consultaInmuebles', async (req, res) => {
 
 // Endpoint para cargar y procesar el archivo PDF
 app.post('/api/upload', upload.single('file'), (req, res) => {
-  const filePath = req.file.path;
-  const processedFilePath = path.join('uploads', 'processed_file.pdf');
+  const filePath = req.file.path;  // Ruta del archivo subido
+  const outputDocxPath = path.join('uploads', 'processed_file.docx');  // Ruta del archivo DOCX procesado
+  const processedFilePath = path.join('uploads', 'processed_file.pdf');  // Ruta del archivo PDF procesado
+
+  // Construir el comando de Python
+  const command = `python3 removeWatermark.py "${filePath}" "${outputDocxPath}" "${processedFilePath}"`;
 
   // Ejecutar el script de Python para procesar el archivo
-  exec(`python3 removeWatermark.py ${filePath}`, (error, stdout, stderr) => {
+  exec(command, (error, stdout, stderr) => {
     if (error) {
       console.error(`Error al ejecutar el script de Python: ${error}`);
+      console.error(`stderr: ${stderr}`);
       return res.status(500).send('Error al procesar el archivo');
     }
 
@@ -114,10 +135,12 @@ app.post('/api/upload', upload.single('file'), (req, res) => {
       }
       // Limpiar archivos temporales
       fs.unlink(filePath, () => {});
+      fs.unlink(outputDocxPath, () => {});
       fs.unlink(processedFilePath, () => {});
     });
   });
 });
+
 
 // Endpoint para descargar el PDF procesado
 app.get('/api/descargarPDF', (req, res) => {
