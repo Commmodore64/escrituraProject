@@ -2,7 +2,8 @@ import react from '@vitejs/plugin-react';
 import path from 'path';
 import { defineConfig } from 'vite';
 
-const basenameProd = '/react-shadcn-starter/'; // Nota el '/' al final
+const basenameProd = '/react-shadcn-starter/';
+
 
 export default defineConfig(({ command }) => {
   const isProd = command === 'build';
@@ -18,16 +19,8 @@ export default defineConfig(({ command }) => {
     define: {
       global: 'globalThis',
     },
-    build: {
-      rollupOptions: {
-        onwarn(warning, warn) {
-          if (warning.code === 'MODULE_LEVEL_DIRECTIVE') {
-            return;
-          }
-          warn(warning);
-        },
-        external: ['axios'],
-      },
+    server: {
+      host: true, // Permite conexiones desde otras máquinas en la red
     },
   };
 });
