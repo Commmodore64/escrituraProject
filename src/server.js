@@ -26,7 +26,7 @@ async function downloadFile(url) {
 
 
 app.use(cors({
-  origin: 'https://spectacled-statuesque-leptoceratops.glitch.me/',
+  origin: 'https://meerkat-quality-tadpole.ngrok-free.app/',
   credentials: true,
 }));
 
