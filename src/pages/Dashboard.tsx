@@ -36,7 +36,7 @@ export default function Dashboard() {
 
     console.log("OTP enviado:", otp);
 
-    const url = `http://localhost:3001/api/consultaInmuebles?FOLIOREAL=${otp}&BUSCAR=LL&TODOS=S&page=1&start=0&limit=5`;
+    const url = `https://spectacled-statuesque-leptoceratops.glitch.me/api/consultaInmuebles?FOLIOREAL=${otp}&BUSCAR=LL&TODOS=S&page=1&start=0&limit=5`;
 
     fetch(url, {
       method: "GET",
@@ -55,7 +55,7 @@ export default function Dashboard() {
           console.log("Número de PARTIDA encontrado:", partida);
 
           // Solicitar el PDF procesado desde el servidor
-          const pdfUrl = `http://localhost:3001/api/descargarPDF?partida=${partida}`;
+          const pdfUrl = `https://spectacled-statuesque-leptoceratops.glitch.me/api/descargarPDF?partida=${partida}`;
 
           fetch(pdfUrl, {
             method: "GET",
@@ -108,7 +108,7 @@ export default function Dashboard() {
 
     try {
       const response = await axios.post(
-        "http://localhost:3001/api/upload",
+        "https://spectacled-statuesque-leptoceratops.glitch.me/api/upload",
         formData,
         {
           headers: {
