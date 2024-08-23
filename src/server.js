@@ -26,7 +26,7 @@ async function downloadFile(url) {
 
 
 app.use(cors({
-  origin: 'http://localhost:5173',
+  origin: 'https://spectacled-statuesque-leptoceratops.glitch.me/',
   credentials: true,
 }));
 
